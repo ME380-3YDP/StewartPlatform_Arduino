@@ -37,4 +37,4 @@ The code will be split into 4 modules:
 
 Needs to be decided:
 -Are we hardcoding the sequences into the arduino?
--Should the sequence file reader be separate, arduinos are crap at reading CSVs.
+-Should the sequence file reader be separate, arduinos are crap at reading CSVs
