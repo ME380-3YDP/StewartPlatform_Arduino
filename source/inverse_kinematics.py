@@ -11,16 +11,17 @@ class invKinematics:
     def __init__(self):
         self.lengthSequence=[]
         self.baseCoords=[(x1,y1,0), (x2,y2,0)] # need to input base coordinates for all attachment points
-        #needs to be parametric using Config.mechParams['radius']
+        # TODO needs to be parametric using Config.mechParams['radius']
     
     def run(self):
         self.positions=self.SeqHandler.read() #array of position vectors
         for idx,vector in enumerate(self.positions):
-            #read through each vector
+            #TODO read through each vector
             # I assume a positionVector of the form [psi,theta,phi,x,y,z]
 
             lengths=self.computeLenghts(vector)
             self.lengthSequence.append()
+        self.SeqHandler.write(self.lengthSequence) #output to file
 
     def createTransformMatrix(self,rotation,translation):
         psi=np.radians(rotation[0])
@@ -43,7 +44,7 @@ class invKinematics:
 
     def quaternionTransform(self,baseVector,rotation,translation):
         baseVector*=Config.mechParams["scale"] #rescale to upper platform
-        lowestZ=Config.mechParams['lowestZ']
+        midZHeight=Config.mechParams['midZHeight']
         q1 = Quaternion(axis=[1, 0, 0], angle=np.radians(rotation[0])) #x rotation, Eulerian Psi, Roll
         q2 = Quaternion(axis=[0, 1, 0], angle=np.radians(rotation[1]))  # y rotation, Eulerian Theta, Pitch
         q3 = Quaternion(axis=[0, 0, 1], angle=np.pi + np.radians(rotation[2]))  # Z rotation, Eulerian phi, Yaw
@@ -51,7 +52,7 @@ class invKinematics:
         qR=q1*q2*q3
         rV=qR.rotate(baseVector) #qaternion rotation
         platformVector=np.add(rV,translation) #add the translation
-        platformVector=np.subtract(lowestZ,platformVector) #subtract the lowest Z-position
+        platformVector=np.add(midZHeight,platformVector) #add the Z=0 position.
         return platformVector
 
     def computeLenghts(self, position):
@@ -65,6 +66,7 @@ class invKinematics:
                 R=self.createTransformMatrix(rotation,translation)
                 platformvector=np.dot(basePoint,R) # not sure if this is right
             legLength=np.linalg.norm(platformvector-np.take(self.baseCoords,i-3,mode="wrap")) # directly implementing the paper, not sure why this is done
+            legLength-=Config.mechParams['defaultLength'] #subtract the length of the syringe itself to obtain a delta
             lengths.append(legLength)
         return lengths
 
