@@ -1,7 +1,7 @@
 class baked //precomputed from python module unless we want to hook them together somehow
 {
   public:
-  int mazeSolution=0;//hardcoded array of lenghts and timings for mazesolution. Might be a better way to do this
+  int mazeSolution=0;//hardcoded 2D array of lenghts and timings for mazesolution. Might be a better way to do this using std::Vectors
   int wave=0; //do the wave
   int tiltX=0;// manual mode positions
   int tiltY=0;// manual mode positions
@@ -11,14 +11,15 @@ class userInterface
 {public:
 
   bool errorHandler(int e){
-    //output the error to serial
+    //TODO output the error to serial
     };
 
   bool stateWriter(char ){
-    //print the state of the system for debugging
+    //TODO print the state of the system (positions, ect) to Serial for debugging
     };
   void inputHandler(int key){
     //determine what to do when the user presses a certain key, see example code
+    //TODO handle commands to run the solution, reset to the default position, manual yaw and pitch
     };
   };
 
@@ -32,23 +33,24 @@ Serial.begin(9600);
 
 void loop() {
   bool run=0;
-  // put your main code here, to run repeatedly:
   //(pseudocode) Serial.onRecieve= UI.inputHandler(serial.recieved)
   //wait for "run" command in this loop
   if (run) mazeSolve(motions.mazeSolution); //run with the main maze solution
 }
 
 void motorAngles(int lengthVector){
-  //compute the servo angles for each servo
+  //TODO compute the servo angles for each servo based on the required length. Lengths are defined with 0 being fully retracted (deltaL).
+  //Audrey, I think this one is yours
 }
 
 void servoInterface(int anglesVector){
-  //sends the required signals to the servos
+  //TODO sends the required signals to the servos
+  //Kelly this is all you
 }
 
 bool mazeSolve(int lengthVector){
   userInterface UI; //define a new userInterface object
-  for(obj = var in lengthVector) //not a proper for loop
+  for(obj = var in lengthVector) //TODO build proper array iterator
   {
     timeDelay=obj.time; //get time from the lengthVector
     angles=motorAngles(lengthVector) //compute angles
