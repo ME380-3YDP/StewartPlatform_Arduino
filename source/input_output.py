@@ -1,6 +1,6 @@
 from csv import writer
 
-class SeqReader:
+class SeqHandler:
     def __init__(self,path):
         self.name="none"
         self.sequence=[]
