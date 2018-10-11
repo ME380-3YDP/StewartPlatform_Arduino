@@ -23,7 +23,7 @@ class invKinematics:
             self.lengthSequence.append()
         self.SeqHandler.write(self.lengthSequence) #output to file
 
-    def createTransformMatrix(self,rotation,translation):
+    def createTransformMatrix(self,rotation):
         psi=np.radians(rotation[0])
         cPsi,sPsi=np.cos(psi),np.sin(psi)
 
@@ -33,13 +33,11 @@ class invKinematics:
         phi = np.radians(rotation[2])
         cPhi, sPhi = np.cos(phi), np.sin(phi)
 
-        x,y,z=translation # unpack
         s=Config.mechParams['scale']
-        matrix=np.array([[-s*cPhi*cT,   s*(cPhi*sPsi-cPsi*sT*sPhi),    -s(sPsi*sPhi+cPsi*cPhi*sT),  x],
-                                [-s*cT*sPsi,   -s*(sPsi*sT*sPhi+cPsi*cPhi),    s*(cPsi*sPhi-cPhi*sPsi*sT),  y],
-                                [-s*sT,         s*cT*sPhi,                     s*cT*cPhi,                   z],
-                                [0,             0,                              0,                          1]])
-        #this looks terrible
+        matrix=np.array([[-s*cPhi*cT,   s*(cPhi*sPsi-cPsi*sT*sPhi),    -s(sPsi*sPhi+cPsi*cPhi*sT)],
+                        [-s*cT*sPsi,   -s*(sPsi*sT*sPhi+cPsi*cPhi),    s*(cPsi*sPhi-cPhi*sPsi*sT)],
+                        [-s*sT,         s*cT*sPhi,                     s*cT*cPhi,                ],
+                         ])
         return matrix
 
     def quaternionTransform(self,baseVector,rotation,translation):
@@ -62,10 +60,11 @@ class invKinematics:
         for i,basePoint in enumerate(self.baseCoords):
             if Config.options['transformMode']=="quaternion":
                 platformVector = self.quaternionTransform(basePoint,rotation,translation)  # transform to the platform
-            else
-                R=self.createTransformMatrix(rotation,translation)
-                platformvector=np.dot(basePoint,R) # not sure if this is right
-            legLength=np.linalg.norm(platformvector-np.take(self.baseCoords,i-3,mode="wrap")) # directly implementing the paper, not sure why this is done
+            else:
+                R=self.createTransformMatrix(rotation)
+                platformVector=np.dot(basePoint,R) # R o T a T E the vector
+                platformVector = np.add(platformVector, translation)  # add the translation
+            legLength=np.linalg.norm(platformVector-basePoint) # get length by subtracting base vector
             legLength-=Config.mechParams['defaultLength'] #subtract the length of the syringe itself to obtain a delta
             lengths.append(legLength)
         return lengths
@@ -79,7 +78,9 @@ def main(): #runs when we start the script
         sequence_file = 0
 
     print(__doc__)
-    invKinematics.SeqHandler=SeqHandler(sequence_file)
+    kin=invKinematics
+    kin.SeqHandler=SeqHandler(sequence_file)
+    kin.run()
 
 if __name__ == '__main__':
     main()
