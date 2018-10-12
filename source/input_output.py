@@ -9,19 +9,15 @@ class SeqHandler:
         print("Running")
         # TODO read and format the CSV sequence file into array of [psi,theta,phi,x,y,z,time] vectors
         import csv
-        with open('Maze Solution.csv', 'r') as csvfile:
+        with open('Maze Solution.csv') as csvfile:
             csv_reader = csv.reader(csvfile, delimiter=',')
-            line_count=0
+            vectors = []
             for row in csv_reader:
-                if line_count==0:
-                    print (f'Array is formatted as [psi,theta,phi,x,y,z,time] vectors')
-                    line_count +=1
-                else:
-                    data=[]
-                    for row in csv_reader:
-                        data.append(row)
+                vectors.append(row)
             print(data[1:])
-        # I wrote this, pls delete or modify if it's not what how you want it
+            
+        #pls delete or modify if it's not what how you want it.
+        #also created a separate .csv file without the initial header names to make it easier to write this code
 
      
     def write(self):
