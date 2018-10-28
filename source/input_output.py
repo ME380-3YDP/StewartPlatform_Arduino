@@ -19,7 +19,14 @@ class SeqHandler:
         #pls delete or modify if it's not what how you want it.
         #also created a separate .csv file without the initial header names to make it easier to write this code
 
-     
-    def write(self):
-        # TODO write a nice array for the arduino to read. Probably txt or CSV
-        return 1
+class Arduino:
+    def __init__(self):
+        self.serial=serial.Serial('/dev/ttyACM1', 9600)
+    def read(self):
+        data=self.serial.readline()
+        return data
+    def write(data):
+        if type(data)==int:
+            self.serial.write(struct.pack('>B', data)) # this works for all integers, tested it
+            response=int(testSer.readline())
+        return response
