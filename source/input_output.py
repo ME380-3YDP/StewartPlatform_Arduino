@@ -15,7 +15,7 @@ class SeqHandler:
             for row in csv_reader:
                 vectors.append(row)
             print(data[1:])
-            
+        return vectors
         #pls delete or modify if it's not what how you want it.
         #also created a separate .csv file without the initial header names to make it easier to write this code
 

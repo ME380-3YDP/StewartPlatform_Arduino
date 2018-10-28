@@ -10,16 +10,11 @@ if (Serial.available() > 0) {
                 int data = Serial.read();
 
                 // say what you got:
-                Serial.print("I received: ");
                 Serial.println(data, DEC);
-                //wait for us to get 6 values
-                servoInterface(data) #tell the servos to move
+                //TODO wait for us to get 6 values, put them into dataArray
+                for(int i=0; i<5 i++){
+                pwm.setPWM(i, 0, dataArray[i]); //(servo, 0, position)}
         }
-}
-
-void servoInterface(int anglesVector){
-  //TODO sends the required signals to the servos
-  //Kelly this is all you
 }
 
 

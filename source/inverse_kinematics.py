@@ -17,11 +17,10 @@ class invKinematics:
     def run(self):
         self.positions=self.SeqHandler.read() #array of position vectors
         for idx,vector in enumerate(self.positions):
-            #TODO read through each vector
             # I assume a positionVector of the form [psi,theta,phi,x,y,z]
-
-            lengths=self.computeLenghts(vector)
-            self.lengthSequence.append()
+            lengths=self.computeLength(vector)
+            angles=self.computeAngles(lengths)
+            self.lengthSequence.append(lengths)
             for i in self.lengthSequence:
                 Arduino.write(i)  # TODO need to format the way this works
                 time.sleep(time) # Sleep for the required time
@@ -60,7 +59,7 @@ class invKinematics:
         platformVector=np.add(midZHeight,platformVector) #add the Z=0 position.
         return platformVector
 
-    def computeLenghts(self, position):
+    def computeLength(self, position):
         lengths=[]
         rotation=position[0:2]
         translation=position[3:5]
@@ -76,6 +75,10 @@ class invKinematics:
             lengths.append(legLength)
         return lengths
 
+    def computeAngle(self, length):
+        #TODO compute the PWM AUDREY
+        angle=""
+        return angle
 
 
 def main(): #runs when we start the script
@@ -91,7 +94,9 @@ def main(): #runs when we start the script
             kin.SeqHandler = SeqHandler(sequence_file)
             kin.run()
         elif command == "M":
+            while True:
+                i=input("Command:")
+                if i="servo1":
+                    Arduino.write(300)
             #TODO make manual command mode here that tilts in x and y
-
-if __name__ == '__main__':
-    main()
+if __name__ == '__main__':      main()
