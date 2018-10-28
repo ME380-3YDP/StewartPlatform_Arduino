@@ -32,17 +32,12 @@ class invKinematics:
 
 
     def createTransformMatrix(self,rotation):
-        psi=np.radians(rotation[0])
+        psi,theta,phi=rotation
         cPsi,sPsi=np.cos(psi),np.sin(psi)
-
-        theta = np.radians(rotation[1])
         cT, sT = np.cos(theta), np.sin(theta)
-
-        phi = np.radians(rotation[2])
         cPhi, sPhi = np.cos(phi), np.sin(phi)
-
         s=mechParams['scale']
-        matrix=np.array([[-s*cPhi*cT,   s*(cPhi*sPsi-cPsi*sT*sPhi),    -s(sPsi*sPhi+cPsi*cPhi*sT)],
+        matrix=np.array([[-s*cPhi*cT,   s*(cPhi*sPsi-cPsi*sT*sPhi),    -s*(sPsi*sPhi+cPsi*cPhi*sT)],
                         [-s*cT*sPsi,   -s*(sPsi*sT*sPhi+cPsi*cPhi),    s*(cPsi*sPhi-cPhi*sPsi*sT)],
                         [-s*sT,         s*cT*sPhi,                     s*cT*cPhi,                ],
                          ])
@@ -51,8 +46,6 @@ class invKinematics:
     def quaternionTransform(self,baseVector,rotation,translation):
         baseVector=np.multiply(baseVector,mechParams["scale"]) #rescale to upper platform
         midZHeight=mechParams['midZHeight']
-        rotation=[np.radians(i)for i in rotation] #radians
-        rotation[2]+=np.pi
         q1 = Quaternion(axis=[1, 0, 0], angle=rotation[0]) #x rotation, Eulerian Psi, Roll
         q2 = Quaternion(axis=[0, 1, 0], angle=rotation[1])  # y rotation, Eulerian Theta, Pitch
         q3 = Quaternion(axis=[0, 0, 1], angle=rotation[2])  # Z rotation, Eulerian phi, Yaw
@@ -66,6 +59,8 @@ class invKinematics:
     def computeLengths(self, position):
         lengths=[]
         rotation=position[0:3]
+        rotation=[np.radians(i)for i in rotation] #radians
+        rotation[2] += np.pi #add the 180 degree default platform rotation
         translation=position[3:6]
         for i, basePoint in enumerate(self.baseCoords):
             if options['transformMode']=="quaternion":
