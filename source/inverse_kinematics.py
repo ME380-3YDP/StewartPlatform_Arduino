@@ -100,3 +100,5 @@ def main(): #runs when we start the script
 
 if __name__ == '__main__':
     main()
+
+TODO some stuff
