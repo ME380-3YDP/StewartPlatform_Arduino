@@ -1,8 +1,13 @@
+#include <Wire.h>
+#include <Adafruit_PWMServoDriver.h>
+Adafruit_PWMServoDriver pwm = Adafruit_PWMServoDriver();
+
 void setup() {
   // put your setup code here, to run once:
 Serial.begin(9600);
+pwm.begin();
+pwm.setPWMFreq(60);  // Analog servos run at ~60 Hz updates
 }
-
 
 void loop() {
 if (Serial.available() > 0) {
