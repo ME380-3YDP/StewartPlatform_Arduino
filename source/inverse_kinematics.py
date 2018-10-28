@@ -1,7 +1,8 @@
-from input_output import SeqHandler
+from .input_output import Arduino,SeqHandler
+from .Config import mechParams, options
 import numpy as np
+import time
 import tkinter
-import Config
 from pyquaternion import Quaternion
 from tkinter.filedialog import askopenfilename
 root = tkinter.Tk() #File open dialog
@@ -21,7 +22,13 @@ class invKinematics:
 
             lengths=self.computeLenghts(vector)
             self.lengthSequence.append()
-        self.SeqHandler.write(self.lengthSequence) #output to file
+            for i in self.lengthSequence:
+                Arduino.write(i)  # TODO need to format the way this works
+                time.sleep(time) # Sleep for the required time
+                if not Arduino.read(): #check that the move had been completed
+                    break
+
+
 
     def createTransformMatrix(self,rotation):
         psi=np.radians(rotation[0])
@@ -33,7 +40,7 @@ class invKinematics:
         phi = np.radians(rotation[2])
         cPhi, sPhi = np.cos(phi), np.sin(phi)
 
-        s=Config.mechParams['scale']
+        s=mechParams['scale']
         matrix=np.array([[-s*cPhi*cT,   s*(cPhi*sPsi-cPsi*sT*sPhi),    -s(sPsi*sPhi+cPsi*cPhi*sT)],
                         [-s*cT*sPsi,   -s*(sPsi*sT*sPhi+cPsi*cPhi),    s*(cPsi*sPhi-cPhi*sPsi*sT)],
                         [-s*sT,         s*cT*sPhi,                     s*cT*cPhi,                ],
@@ -41,8 +48,8 @@ class invKinematics:
         return matrix
 
     def quaternionTransform(self,baseVector,rotation,translation):
-        baseVector*=Config.mechParams["scale"] #rescale to upper platform
-        midZHeight=Config.mechParams['midZHeight']
+        baseVector*=mechParams["scale"] #rescale to upper platform
+        midZHeight=mechParams['midZHeight']
         q1 = Quaternion(axis=[1, 0, 0], angle=np.radians(rotation[0])) #x rotation, Eulerian Psi, Roll
         q2 = Quaternion(axis=[0, 1, 0], angle=np.radians(rotation[1]))  # y rotation, Eulerian Theta, Pitch
         q3 = Quaternion(axis=[0, 0, 1], angle=np.pi + np.radians(rotation[2]))  # Z rotation, Eulerian phi, Yaw
@@ -58,29 +65,33 @@ class invKinematics:
         rotation=position[0:2]
         translation=position[3:5]
         for i,basePoint in enumerate(self.baseCoords):
-            if Config.options['transformMode']=="quaternion":
+            if options['transformMode']=="quaternion":
                 platformVector = self.quaternionTransform(basePoint,rotation,translation)  # transform to the platform
             else:
                 R=self.createTransformMatrix(rotation)
                 platformVector=np.dot(basePoint,R) # R o T a T E the vector
                 platformVector = np.add(platformVector, translation)  # add the translation
             legLength=np.linalg.norm(platformVector-basePoint) # get length by subtracting base vector
-            legLength-=Config.mechParams['defaultLength'] #subtract the length of the syringe itself to obtain a delta
+            legLength-=mechParams['defaultLength'] #subtract the length of the syringe itself to obtain a delta
             lengths.append(legLength)
         return lengths
 
 
 
 def main(): #runs when we start the script
-    try:
-        sequence_file =askopenfilename(title = "Select sequence file",filetypes = (("Memes","*.csv"),("all files","*.*")))
-    except:
-        sequence_file = 0
-
-    print(__doc__)
-    kin=invKinematics
-    kin.SeqHandler=SeqHandler(sequence_file)
-    kin.run()
+    while True:
+        command=input("R to run a solution, M for manual Mode")
+        if command == "R":
+            try:
+                sequence_file = askopenfilename(title="Select sequence file",
+                                                filetypes=(("Memes", "*.csv"), ("all files", "*.*")))
+            except:
+                sequence_file = 0
+            kin = invKinematics
+            kin.SeqHandler = SeqHandler(sequence_file)
+            kin.run()
+        elif command == "M":
+            #TODO make manual command mode here that tilts in x and y
 
 if __name__ == '__main__':
     main()

@@ -3,7 +3,7 @@ from csv import writer
 class SeqHandler:
     def __init__(self,path):
         self.name="none"
-        self.sequence=[]
+        self.sequence=[s]
 
     def read(self):
         print("Running")
