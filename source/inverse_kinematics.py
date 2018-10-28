@@ -12,8 +12,8 @@ class invKinematics:
     def __init__(self,sequencePath):
         self.lengthSequence=[]
         self.csv=SeqHandler(sequencePath)
-        self.baseCoords=np.array([[1,1,0], [2,2,0], [3,3,0],[4,4,0],[5,5,0],[6,6,0]]) # need to input base coordinates for all attachment points
-        # TODO needs to be parametric using Config.mechParams['radius']
+        basePoints=np.array([[.2588,,0], [,0.03198,0], [3,3,0],[4,4,0],[5,5,0],[6,6,0]]) # need to input base coordinates for all attachment points
+        self.baseCoords=np.multiply(basePoints,mechParams['radius'])
     
     def run(self):
         self.positions=self.csv.read() #array of position vectors
@@ -45,6 +45,7 @@ class invKinematics:
 
     def quaternionTransform(self,baseVector,rotation,translation):
         baseVector=np.multiply(baseVector,mechParams["scale"]) #rescale to upper platform
+        rotation[2] += np.pi #add the 180 degree default platform rotation
         midZHeight=mechParams['midZHeight']
         q1 = Quaternion(axis=[1, 0, 0], angle=rotation[0]) #x rotation, Eulerian Psi, Roll
         q2 = Quaternion(axis=[0, 1, 0], angle=rotation[1])  # y rotation, Eulerian Theta, Pitch
@@ -60,7 +61,6 @@ class invKinematics:
         lengths=[]
         rotation=position[0:3]
         rotation=[np.radians(i)for i in rotation] #radians
-        rotation[2] += np.pi #add the 180 degree default platform rotation
         translation=position[3:6]
         for i, basePoint in enumerate(self.baseCoords):
             if options['transformMode']=="quaternion":
@@ -100,3 +100,5 @@ def main(): #runs when we start the script
 
 if __name__ == '__main__':
     main()
+
+#TODO test inasas TODO todo
