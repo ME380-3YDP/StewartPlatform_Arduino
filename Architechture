@@ -35,5 +35,3 @@ The code will be split into 4 modules:
     Handles input functions like running the solve, resetting the platform to origin, and manual position commands eg.(theta=30)
     Handles logging via the serial interface for all debug stuff like state callouts
     Handles error catching and logging
-
-THIS is a test #TODO test todo thing
