@@ -12,14 +12,18 @@ class invKinematics:
     def __init__(self,sequencePath):
         self.lengthSequence=[]
         self.csv=SeqHandler(sequencePath)
-        self.baseCoords=np.array([[1,1,0], [2,2,0], [3,3,0],[4,4,0],[5,5,0],[6,6,0]]) # need to input base coordinates for all attachment points
-        # TODO needs to be parametric using Config.mechParams['radius']
+        c15,s15,sqrt2=(np.cos(np.pi/12.0),np.sin(np.pi/12.0),np.sqrt(2)/2.0)
+        coordinates= np.array([[-c15, -s15, 0], [-sqrt2, -sqrt2, 0], [sqrt2, -sqrt2, 0], [c15, -s15, 0],[s15, c15, 0],[-s15, c15, 0]])
+        self.baseCoords=np.multiply(mechParams['radius'],coordinates)
+        baseRadius=mechParams['scale']*mechParams['radius']
+        self.platformCoords=np.multiply(baseRadius,coordinates)
     
     def run(self):
         self.positions=self.csv.read() #array of position vectors
         for idx,vector in enumerate(self.positions):
             # I assume a positionVector of the form [psi,theta,phi,x,y,z,time]
             lengths=self.computeLengths(vector)
+            print(lengths)
             angles=self.computeAngles(lengths) #lengths is a tuple of 6 lengths of the form (L0,L1,L2,L3,L4,L5) in mm defined as positive from the fully retracted position of the syringe.
             for i in self.angles:
                 Arduino.write(i) #write each angle to the Arduino
@@ -36,10 +40,9 @@ class invKinematics:
         cPsi,sPsi=np.cos(psi),np.sin(psi)
         cT, sT = np.cos(theta), np.sin(theta)
         cPhi, sPhi = np.cos(phi), np.sin(phi)
-        s=mechParams['scale']
-        matrix=np.array([[-s*cPhi*cT,   s*(cPhi*sPsi-cPsi*sT*sPhi),    -s*(sPsi*sPhi+cPsi*cPhi*sT)],
-                        [-s*cT*sPsi,   -s*(sPsi*sT*sPhi+cPsi*cPhi),    s*(cPsi*sPhi-cPhi*sPsi*sT)],
-                        [-s*sT,         s*cT*sPhi,                     s*cT*cPhi,                ],
+        matrix=np.array([[cPhi*cT,   -cPhi*sPsi+cPsi*sT*sPhi,    sPsi*sPhi+cPsi*cPhi*sT],
+                        [cT*sPsi,    sPsi*sT*sPhi+cPsi*cPhi,    -cPsi*sPhi+cPhi*sPsi*sT],
+                        [-sT,         cT*sPhi,                     cT*cPhi,            ],
                          ])
         return matrix
 
@@ -53,24 +56,26 @@ class invKinematics:
         qR=q1*q2*q3
         rV=qR.rotate(baseVector) #qaternion rotation
         platformVector=np.add(rV,translation) #add the translation
-        platformVector=np.add(midZHeight,platformVector) #add the Z=0 position.
+        #platformVector=np.add(midZHeight,platformVector) #add the Z=0 position.
         return platformVector
 
     def computeLengths(self, position):
         lengths=[]
         rotation=position[0:3]
+        #rotation[2] += np.pi  # add the 180 degree default platform rotation
         rotation=[np.radians(i)for i in rotation] #radians
-        rotation[2] += np.pi #add the 180 degree default platform rotation
         translation=position[3:6]
-        for i, basePoint in enumerate(self.baseCoords):
+        R = self.createTransformMatrix(rotation)
+        for i, platformPoint in enumerate(self.platformCoords):
             if options['transformMode']=="quaternion":
-                platformVector = self.quaternionTransform(basePoint,rotation,translation)  # transform to the platform
+                platformVector = self.quaternionTransform(platformPoint,rotation,translation)  # transform to the platform
             else:
-                R=self.createTransformMatrix(rotation)
-                platformVector=np.dot(basePoint,R) # R o T a T E the vector
+                platformVector=np.dot(R,platformPoint) # R o T a T E the vector
                 platformVector = np.add(platformVector, translation)  # add the translation
-            legLength=np.linalg.norm(platformVector-basePoint) # get length by subtracting base vector
-            legLength-=mechParams['defaultLength'] #subtract the length of the syringe itself to obtain a delta
+                hack=[1,0,3,2,5,4]
+            platformVector = np.subtract(platformVector, self.baseCoords[hack[i]])
+            legLength=np.linalg.norm(platformVector) # get length by subtracting base vector
+            #legLength-=mechParams['defaultLength'] #subtract the length of the syringe itself to obtain a delta
             lengths.append(legLength)
         return lengths
 
@@ -100,5 +105,3 @@ def main(): #runs when we start the script
 
 if __name__ == '__main__':
     main()
-
-TODO some stuff
