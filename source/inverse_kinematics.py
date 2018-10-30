@@ -48,6 +48,7 @@ class invKinematics:
 
     def quaternionTransform(self,baseVector,rotation,translation):
         baseVector=np.multiply(baseVector,mechParams["scale"]) #rescale to upper platform
+        rotation[2] += np.pi #add the 180 degree default platform rotation
         midZHeight=mechParams['midZHeight']
         q1 = Quaternion(axis=[1, 0, 0], angle=rotation[0]) #x rotation, Eulerian Psi, Roll
         q2 = Quaternion(axis=[0, 1, 0], angle=rotation[1])  # y rotation, Eulerian Theta, Pitch
