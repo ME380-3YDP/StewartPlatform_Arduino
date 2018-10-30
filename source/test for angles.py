@@ -13,16 +13,17 @@ print(length)
 c_length =[]
 c_length =np.subtract(c, length) #so we can use trig functions
 print(c_length)
-inverseanglemath=np.array
+inverseanglemath=[]
 inverseangle=[]
 anglecalculation=[]
-for i in range(6):
-    inverseanglemath=(-(b**2 - a**2 - (c_length)**2)/(2*a*c_length))
-    inverseangle.append(inverseanglemath)
-    print(inverseangle)
-    for j in range (6):
-        anglecalculation=math.acos(inverseangle)
-        angles.append(anglecalculation)
+for i in c_length:
+    inverseanglemath= (-(b**2 - a**2 - (i)**2)/(2*a*(i))
+
+    for j in c_length:
+        anglecalculation= np.arccos(inverseanglemath(i))
+    #inverseangle.append(inverseanglemath)
+    #print(inverseangle)
+    angles.append(anglecalculation)
 print(angles)
         
         #return angles #should be a tuple of 6 servo angles between 150 and 280 (a0,a1...,a5)
