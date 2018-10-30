@@ -23,3 +23,4 @@ if (Serial.available() > 0) {
 }
 
 
+@todo make this better

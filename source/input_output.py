@@ -7,19 +7,16 @@ class SeqHandler:
         self.sequence=[]
 
     def read(self):
-        print("Running")
-        # TODO read and format the CSV sequence file into array of [psi,theta,phi,x,y,z,time] vectors
+        print("Reading")
         import csv
         with open(self.path) as csvfile:
             csv_reader = csv.reader(csvfile, delimiter=',')
             vectors = []
             for row in csv_reader:
-                row = [int(i) for i in row] #convert to ints
+                row = [float(i) for i in row] #convert to floats
                 vectors.append(row)
                 print(row)
         return vectors
-        #pls delete or modify if it's not what how you want it.
-        #also created a separate .csv file without the initial header names to make it easier to write this code
 
 class Arduino:
     def __init__(self):
