@@ -30,9 +30,9 @@ class invKinematics:
                 Arduino.write(i) #write each angle to the Arduino
                 wait=vector[6]
                 time.sleep(wait) # Sleep for the required time to wait for the ball to roll
-                if not Arduino.read(): #check that the move had been completed
-                    print("No response from Arduino")
-                    break
+                #if not Arduino.read(): #check that the move had been completed
+                   # print("No response from Arduino")
+                    #break
 
 
 
@@ -81,24 +81,24 @@ class invKinematics:
             lengths.append(legLength)
         return lengths
 
-    def computeAngles(self, length):
-        #CODE - WAIT UNTIL ALL LENGTHS L0...L5 HAVE BEEN INPUTTED 
-        lengths = length[0:6]
-        angles=[]
-        a = 0.0035 #length of crank, subject to change. This is measured with the hole spacing center to center (last clearance hole to the hole that connects to the conrod)
-        b = 0.0090 #length of con rod, subject to change (center to center distance) 
-        c = [a+b, a+b, a+b, a+b, a+b, a+b] #starting length when syringe plunger fully enclosed (retracted pos'n)
+    def computeAngles(self, lengths):
+        angles = []
+        a = 0.0225  # length of crank, subject to change. This is measured with the hole spacing center to center (last clearance hole to the hole that connects to the conrod)
+        b = 0.0625  # length of con rod, subject to change (center to center distance)
+        c = [a + b, a + b, a + b, a + b, a + b,
+             a + b]  # starting length when syringe plunger fully enclosed (retracted pos'n)
         print(lengths)
-        c_length =[]
-        c_length =np.subtract(c, lengths) #length to use for cosine law
+        c_length = []
+        c_length = np.subtract(c, lengths)  # length to use for cosine law
         print(c_length)
-        inverseangle=[]
+        inverseangle = []
         for i in c_length:
-            inverseanglemath= -(-b**2 - a**2 + (i)**2)/(2*a*b)
+            inverseanglemath = -(b ** 2 - a ** 2 - (i) ** 2) / (2 * a * (i))
             print(inverseanglemath)
-            calculation= math.acos(inverseanglemath)
-            angles.append(calculation)
-        #TODO convert to PWN 
+            radians = math.acos(inverseanglemath)
+            degrees = math.degrees(radians)
+            angles.append(degrees)
+        print(angles)
         return angles #should be a tuple of 6 servo angles between 150 and 280 (a0,a1...,a5)
 
 
