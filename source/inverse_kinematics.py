@@ -1,6 +1,7 @@
 from input_output import Arduino,SeqHandler
 from Config import mechParams, options
 import numpy as np
+import math
 import time
 import tkinter
 from pyquaternion import Quaternion
@@ -82,13 +83,14 @@ class invKinematics:
 
     def computeAngles(self, length):
         #CODE - WAIT UNTIL ALL LENGTHS L0...L5 HAVE BEEN INPUTTED 
+        lengths = length[0:6]
         angles=[]
         a = 0.0035 #length of crank, subject to change. This is measured with the hole spacing center to center (last clearance hole to the hole that connects to the conrod)
         b = 0.0090 #length of con rod, subject to change (center to center distance) 
         c = [a+b, a+b, a+b, a+b, a+b, a+b] #starting length when syringe plunger fully enclosed (retracted pos'n)
-        print(length)
+        print(lengths)
         c_length =[]
-        c_length =np.subtract(c, length) #length to use for cosine law
+        c_length =np.subtract(c, lengths) #length to use for cosine law
         print(c_length)
         inverseangle=[]
         for i in c_length:
@@ -96,7 +98,7 @@ class invKinematics:
             print(inverseanglemath)
             calculation= math.acos(inverseanglemath)
             angles.append(calculation)
-            #TODO convert to PWN 
+        #TODO convert to PWN 
         return angles #should be a tuple of 6 servo angles between 150 and 280 (a0,a1...,a5)
 
 
