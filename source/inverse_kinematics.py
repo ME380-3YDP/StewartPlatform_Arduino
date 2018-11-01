@@ -77,7 +77,7 @@ class invKinematics:
                 hack=[1,0,3,2,5,4]
             platformVector = np.subtract(platformVector, self.baseCoords[hack[i]])
             legLength=np.linalg.norm(platformVector) # get length by subtracting base vector
-            #legLength-=mechParams['defaultLength'] #subtract the length of the syringe itself to obtain a delta
+            legLength-=mechParams['defaultLength'] #subtract the length of the syringe itself to obtain a delta
             lengths.append(legLength)
         return lengths
 
