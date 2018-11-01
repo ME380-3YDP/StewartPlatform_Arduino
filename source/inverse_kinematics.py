@@ -97,7 +97,8 @@ class invKinematics:
             print(inverseanglemath)
             radians = math.acos(inverseanglemath)
             degrees = math.degrees(radians)
-            angles.append(degrees)
+            angles.append(int (degrees*3.0))
+            
         print(angles)
         return angles #should be a tuple of 6 servo angles between 150 and 280 (a0,a1...,a5)
 
