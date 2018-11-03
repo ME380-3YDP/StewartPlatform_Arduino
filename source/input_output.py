@@ -1,5 +1,6 @@
 import serial
 import struct
+import time
 
 class SeqHandler:
     def __init__(self,path):
@@ -21,14 +22,15 @@ class SeqHandler:
 
 class Arduino:
     def __init__(self):
-        self.serial=serial.Serial('/dev/ttyACM1', 9600)
+        self.serial=serial.Serial('/dev/ttyACM0', 9600)
     def read(self):
         data=int(self.serial.readline())
         return data
     def write(self,data):
-        if type(data)==float and data < 255:
-            self.serial.write(struct.pack('>B', data)) # pending test on floating points
-            response=int(self.serial.readline())
+        if type(data)==int and data < 255:
+            self.serial.write(struct.pack('<B', data))
+            time.sleep(1)
+            #response=int(self.serial.readline())
+            #print(response)
         else:
             print("Data out of range",data)
-        return response
