@@ -1,7 +1,7 @@
 import serial
 import struct
 import time
-
+#input
 class SeqHandler:
     def __init__(self,path):
         self.path=path
