@@ -1,6 +1,7 @@
 from input_output import Arduino,SeqHandler
 from Config import mechParams, options
 import numpy as np
+import math
 import time
 import tkinter
 from pyquaternion import Quaternion
@@ -19,19 +20,22 @@ class invKinematics:
         self.platformCoords=np.multiply(baseRadius,coordinates)
     
     def run(self):
+        controller=Arduino()
         self.positions=self.csv.read() #array of position vectors
         for idx,vector in enumerate(self.positions):
             # I assume a positionVector of the form [psi,theta,phi,x,y,z,time]
             lengths=self.computeLengths(vector)
             print(lengths)
-            angles=self.computeAngles(lengths) #lengths is a tuple of 6 lengths of the form (L0,L1,L2,L3,L4,L5) in mm defined as positive from the fully retracted position of the syringe.
+            self.angles=self.computeAngles(lengths) #lengths is a tuple of 6 lengths of the form (L0,L1,L2,L3,L4,L5) in mm defined as positive from the fully retracted position of the syringe.
+            controller.write(0)
             for i in self.angles:
-                Arduino.write(i) #write each angle to the Arduino
+                print("Writing",i)
+                controller.write(i) #write each angle to the Arduino
                 wait=vector[6]
-                time.sleep(wait) # Sleep for the required time to wait for the ball to roll
-                if not Arduino.read(): #check that the move had been completed
-                    print("No response from Arduino")
-                    break
+            time.sleep(wait)  # Sleep for the required time to wait for the ball to roll
+                #if not Arduino.read(): #check that the move had been completed
+                   # print("No response from Arduino")
+                    #break
 
 
 
@@ -76,15 +80,25 @@ class invKinematics:
                 hack=[1,0,3,2,5,4]
             platformVector = np.subtract(platformVector, self.baseCoords[hack[i]])
             legLength=np.linalg.norm(platformVector) # get length by subtracting base vector
-            #legLength-=mechParams['defaultLength'] #subtract the length of the syringe itself to obtain a delta
+            legLength-=mechParams['defaultLength'] #subtract the length of the syringe itself to obtain a delta
             lengths.append(legLength)
         return lengths
 
-    def computeAngles(self, length):
-        #TODO compute the PWM AUDREY
-        #input is a tuple of 6 lengths of the form (L0,L1,L2,L3,L4,L5) in mm defined as positive from the fully retracted position of the syringe.
-        angles=""
-        return angles #should be a tuple of 6 servo angles between 150 and 280 (a0,a1...,a5)
+    def computeAngles(self, lengths):
+        range=mechParams['rangeOfMotion']
+        lengths=[range-i for i in lengths] # convert the top syringe length to motion at the bottom by subtracting ROM
+        angles = []
+        a = 0.0225  # length of crank, subject to change. This is measured with the hole spacing center to center (last clearance hole to the hole that connects to the conrod)
+        b = 0.0625  # length of con rod, subject to change (center to center distance)
+        c_length =[a+b-i for i in lengths]  # starting length when syringe plunger fully enclosed (retracted pos'n)
+        for i in c_length:
+            inverseanglemath = -(b ** 2 - a ** 2 - (i) ** 2) / (2 * a * (i))
+            radians = math.acos(inverseanglemath)
+            degrees = math.degrees(radians)
+            angles.append(int (degrees*3.0)) #note that this is for 1/3 degree resolution and due to data transfer.
+            
+        print(angles)
+        return angles #should be a tuple of 6 servo angles between 0 and 240 (a0,a1...,a5)
 
 
 def main(): #runs when we start the script

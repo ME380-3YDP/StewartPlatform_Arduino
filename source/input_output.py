@@ -1,4 +1,6 @@
-from csv import writer
+import serial
+import struct
+import time
 
 class SeqHandler:
     def __init__(self,path):
@@ -20,12 +22,15 @@ class SeqHandler:
 
 class Arduino:
     def __init__(self):
-        self.serial=serial.Serial('/dev/ttyACM1', 9600)
+        self.serial=serial.Serial('/dev/ttyACM0', 9600)
     def read(self):
-        data=self.serial.readline()
+        data=int(self.serial.readline())
         return data
-    def write(data):
-        if type(data)==int:
-            self.serial.write(struct.pack('>B', data)) # this works for all integers, tested it
-            response=int(testSer.readline())
-        return response
+    def write(self,data):
+        if type(data)==int and data < 255:
+            self.serial.write(struct.pack('<B', data))
+            time.sleep(1)
+            #response=int(self.serial.readline())
+            #print(response)
+        else:
+            print("Data out of range",data)

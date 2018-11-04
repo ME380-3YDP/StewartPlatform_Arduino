@@ -1,0 +1,11 @@
+import serial
+import struct
+import time
+Arduino=serial.Serial('/dev/ttyACM1', 9600)
+while True:
+    #for i in range(0,40):
+        angle=6*3 #0,7.5,15,22.5,30
+        for servo in range (0,6):
+            Arduino.write(struct.pack('<B', angle)) # sends float angle as a string
+            response=Arduino.readline()
+            print(int(response))

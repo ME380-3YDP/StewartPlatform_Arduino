@@ -10,17 +10,18 @@ pwm.setPWMFreq(60);  // Analog servos run at ~60 Hz updates
 }
 
 void loop() {
-if (Serial.available() > 0) {
+int data=0;
+int servoIndex=0;
+int dataArray[6]={-1,-1,-1,-1,-1,-1};
+while (dataArray[5]==-1){
+    if (Serial.available() > 0) {
                 // read the incoming byte:
-                int data = Serial.read();
-
-                // say what you got:
-                Serial.println(data, DEC);
-                //TODO wait for us to get 6 values, put them into dataArray
-                for(int i=0; i<5 i++){
-                pwm.setPWM(i, 0, dataArray[i]); //(servo, 0, position)}
-        }
+                 data=Serial.read();
+                 dataArray[servoIndex]=map(data,0,240,150,300);
+                 servoIndex++;
+                 Serial.println(data, DEC);}
+                }
+  for (int i=0; i<6; i++){
+  pwm.setPWM(i, 0, dataArray[i]); //(servo, 0, position)}
+  }          
 }
-
-
-@todo make this better
