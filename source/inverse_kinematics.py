@@ -25,17 +25,13 @@ class invKinematics:
         for idx,vector in enumerate(self.positions):
             # I assume a positionVector of the form [psi,theta,phi,x,y,z,time]
             lengths=self.computeLengths(vector)
-            print(lengths)
-            self.angles=self.computeAngles(lengths) #lengths is a tuple of 6 lengths of the form (L0,L1,L2,L3,L4,L5) in mm defined as positive from the fully retracted position of the syringe.
-            controller.write(0)
+            print("Moving to",vector)
+            print("Leg Lengths:",lengths)
+            self.angles=self.computeAngles(lengths) #lengths is a list of 6 lengths of the form (L0,L1,L2,L3,L4,L5) in mm defined as positive from the fully retracted position of the syringe.
             for i in self.angles:
-                print("Writing",i)
                 controller.write(i) #write each angle to the Arduino
-                wait=vector[6]
-            time.sleep(wait)  # Sleep for the required time to wait for the ball to roll
-                #if not Arduino.read(): #check that the move had been completed
-                   # print("No response from Arduino")
-                    #break
+            wait = vector[6]
+            time.sleep(wait)
 
 
 
@@ -53,7 +49,6 @@ class invKinematics:
     def quaternionTransform(self,baseVector,rotation,translation):
         baseVector=np.multiply(baseVector,mechParams["scale"]) #rescale to upper platform
         rotation[2] += np.pi #add the 180 degree default platform rotation
-        midZHeight=mechParams['midZHeight']
         q1 = Quaternion(axis=[1, 0, 0], angle=rotation[0]) #x rotation, Eulerian Psi, Roll
         q2 = Quaternion(axis=[0, 1, 0], angle=rotation[1])  # y rotation, Eulerian Theta, Pitch
         q3 = Quaternion(axis=[0, 0, 1], angle=rotation[2])  # Z rotation, Eulerian phi, Yaw
@@ -61,7 +56,6 @@ class invKinematics:
         qR=q1*q2*q3
         rV=qR.rotate(baseVector) #qaternion rotation
         platformVector=np.add(rV,translation) #add the translation
-        #platformVector=np.add(midZHeight,platformVector) #add the Z=0 position.
         return platformVector
 
     def computeLengths(self, position):
@@ -88,17 +82,15 @@ class invKinematics:
         range=mechParams['rangeOfMotion']
         lengths=[range-i for i in lengths] # convert the top syringe length to motion at the bottom by subtracting ROM
         angles = []
-        a = 0.0225  # length of crank, subject to change. This is measured with the hole spacing center to center (last clearance hole to the hole that connects to the conrod)
-        b = 0.0625  # length of con rod, subject to change (center to center distance)
+        a = mechParams['crankLength']
+        b = mechParams['conRodLength']
         c_length =[a+b-i for i in lengths]  # starting length when syringe plunger fully enclosed (retracted pos'n)
         for i in c_length:
             inverseanglemath = -(b ** 2 - a ** 2 - (i) ** 2) / (2 * a * (i))
             radians = math.acos(inverseanglemath)
             degrees = math.degrees(radians)
             angles.append(int (degrees*3.0)) #note that this is for 1/3 degree resolution and due to data transfer.
-            
-        print(angles)
-        return angles #should be a tuple of 6 servo angles between 0 and 240 (a0,a1...,a5)
+        return angles #should be a list of 6 servo angles between 0 and 240 (a0,a1...,a5)
 
 
 def main(): #runs when we start the script

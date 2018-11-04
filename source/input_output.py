@@ -28,8 +28,8 @@ class Arduino:
         return data
     def write(self,data):
         if type(data)==int and data < 255:
-            self.serial.write(struct.pack('<B', data))
             time.sleep(1)
+            self.serial.write(struct.pack('<B', data))
             #response=int(self.serial.readline())
             #print(response)
         else:

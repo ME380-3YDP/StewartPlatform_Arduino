@@ -7,6 +7,9 @@ void setup() {
 Serial.begin(9600);
 pwm.begin();
 pwm.setPWMFreq(60);  // Analog servos run at ~60 Hz updates
+for (int i=0; i<6; i++){
+  pwm.setPWM(i, 0, 160); //(servo, 0, position)}
+  }          
 }
 
 void loop() {
@@ -17,7 +20,7 @@ while (dataArray[5]==-1){
     if (Serial.available() > 0) {
                 // read the incoming byte:
                  data=Serial.read();
-                 dataArray[servoIndex]=map(data,0,240,150,300);
+                 dataArray[servoIndex]=map(data,0,240,160,300);
                  servoIndex++;
                  Serial.println(data, DEC);}
                 }
