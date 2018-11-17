@@ -64,7 +64,11 @@ class invKinematics:
 
     def computeAngles(self, lengths):
         range=mechParams['rangeOfMotion']
+        if any (t<0 or t>range for t in lengths):
+            print("ERROR, lengths out of ROM", lengths)
+            exit()
         lengths=[range-i for i in lengths] # convert the top syringe length to motion at the bottom by subtracting ROM
+
         angles = []
         a = mechParams['crankLength']
         b = mechParams['conRodLength']

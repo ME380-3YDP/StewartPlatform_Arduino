@@ -3,7 +3,7 @@
 Adafruit_PWMServoDriver pwm = Adafruit_PWMServoDriver();
 int servoMap[2][6]={
   {197,168,178,150,190,170},
-  {368,325,395,315,385,360,}
+  {368,325,395,315,410,360,}
 };
 
 void setup() {
@@ -13,8 +13,6 @@ pwm.begin();
 pwm.setPWMFreq(60);  // Analog servos run at ~60 Hz updates
 for (int i=0; i<6; i++){
   pwm.setPWM(i, 0, servoMap[0][i]); //(servo, 0, position)}
-  delay(600);
-  pwm.setPWM(i, 0, servoMap[1][i]); //(servo, 0, position)}
   }          
 }
 
