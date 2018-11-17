@@ -8,7 +8,6 @@ class SeqHandler:
         self.sequence=[]
 
     def read(self):
-        print("Reading")
         import csv
         with open(self.path) as csvfile:
             csv_reader = csv.reader(csvfile, delimiter=',')
@@ -21,13 +20,14 @@ class SeqHandler:
 
 class Arduino:
     def __init__(self):
-        self.serial=serial.Serial('/dev/ttyACM0', 19400)
+        self.serial=serial.Serial('/dev/ttyACM1', 19200)
     def read(self):
         data=int(self.serial.readline())
         return data
 
     def write(self,data):
-        str=string.encode(data)
-        self.serial.writelines(str)
-        response=int(self.serial.readline())
-        print("Arduino:",response)
+        dataStr=str(data)
+        dataStr+=" \n"
+        self.serial.write(dataStr.encode())
+        response=float(self.serial.readline())
+        print("Arduino angle:",response)

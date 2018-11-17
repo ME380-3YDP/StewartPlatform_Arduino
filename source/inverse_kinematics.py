@@ -73,7 +73,7 @@ class invKinematics:
             inverseanglemath = -(b ** 2 - a ** 2 - (i) ** 2) / (2 * a * (i))
             radians = math.acos(inverseanglemath)
             degrees = math.degrees(radians)
-            angles.append(int (degrees*4.0)) #note that this is for 1/4 degree resolution
+            angles.append(degrees)
         return angles #should be a list of 6 servo angles between 0 and 320 (a0,a1...,a5)
 
 
