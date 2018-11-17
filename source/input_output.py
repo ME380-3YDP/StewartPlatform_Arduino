@@ -20,7 +20,7 @@ class SeqHandler:
 
 class Arduino:
     def __init__(self):
-        self.serial=serial.Serial('/dev/ttyACM1', 19200)
+        self.serial=serial.Serial('/dev/ttyACM0', 19200)
     def read(self):
         data=int(self.serial.readline())
         return data
@@ -29,5 +29,5 @@ class Arduino:
         dataStr=str(data)
         dataStr+=" \n"
         self.serial.write(dataStr.encode())
-        response=float(self.serial.readline())
-        print("Arduino angle:",response)
+        #response=float(self.serial.readline())
+        #print("Arduino angle:",response)
