@@ -1,6 +1,6 @@
 import numpy as np
 mechParams={
-    'radius':0.118,
+    'radius':0.100,
     'scale': 2.0/3.0,# ratio of top to bottom platform radius
     'defaultLength': 0.15,   # length of the syringe assembly when the syringe is fully retracted
     'rangeOfMotion': 0.058,

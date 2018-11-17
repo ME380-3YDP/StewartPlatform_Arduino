@@ -4,7 +4,6 @@ import numpy as np
 import math
 import time
 import tkinter
-from pyquaternion import Quaternion
 from tkinter.filedialog import askopenfilename
 root = tkinter.Tk() #File open dialog
 root.withdraw()
@@ -25,11 +24,11 @@ class invKinematics:
         for idx,vector in enumerate(self.positions):
             # I assume a positionVector of the form [psi,theta,phi,x,y,z,time]
             lengths=self.computeLengths(vector)
-            print("Moving to",vector)
-            print("Leg Lengths:",lengths)
+            print("Syringe Lengths:",lengths)
             self.angles=self.computeAngles(lengths) #lengths is a list of 6 lengths of the form (L0,L1,L2,L3,L4,L5) in mm defined as positive from the fully retracted position of the syringe.
             for i in self.angles:
                 controller.write(i) #write each angle to the Arduino
+            print("Moving to", vector)
             wait = vector[6]
             time.sleep(wait)
 
@@ -46,18 +45,6 @@ class invKinematics:
                          ])
         return matrix
 
-    def quaternionTransform(self,baseVector,rotation,translation):
-        baseVector=np.multiply(baseVector,mechParams["scale"]) #rescale to upper platform
-        rotation[2] += np.pi #add the 180 degree default platform rotation
-        q1 = Quaternion(axis=[1, 0, 0], angle=rotation[0]) #x rotation, Eulerian Psi, Roll
-        q2 = Quaternion(axis=[0, 1, 0], angle=rotation[1])  # y rotation, Eulerian Theta, Pitch
-        q3 = Quaternion(axis=[0, 0, 1], angle=rotation[2])  # Z rotation, Eulerian phi, Yaw
-        # Note that the platform is initially rotated 180 degrees from the base. XYZ axes as per the paper
-        qR=q1*q2*q3
-        rV=qR.rotate(baseVector) #qaternion rotation
-        platformVector=np.add(rV,translation) #add the translation
-        return platformVector
-
     def computeLengths(self, position):
         lengths=[]
         rotation=position[0:3]
@@ -66,12 +53,9 @@ class invKinematics:
         translation=position[3:6]
         R = self.createTransformMatrix(rotation)
         for i, platformPoint in enumerate(self.platformCoords):
-            if options['transformMode']=="quaternion":
-                platformVector = self.quaternionTransform(platformPoint,rotation,translation)  # transform to the platform
-            else:
-                platformVector=np.dot(R,platformPoint) # R o T a T E the vector
-                platformVector = np.add(platformVector, translation)  # add the translation
-                hack=[1,0,3,2,5,4]
+            platformVector=np.dot(R,platformPoint) # R o T a T E the vector
+            platformVector = np.add(platformVector, translation)  # add the translation
+            hack=[1,0,3,2,5,4]
             platformVector = np.subtract(platformVector, self.baseCoords[hack[i]])
             legLength=np.linalg.norm(platformVector) # get length by subtracting base vector
             legLength-=mechParams['defaultLength'] #subtract the length of the syringe itself to obtain a delta
