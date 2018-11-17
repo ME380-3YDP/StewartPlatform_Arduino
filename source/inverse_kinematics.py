@@ -73,8 +73,8 @@ class invKinematics:
             inverseanglemath = -(b ** 2 - a ** 2 - (i) ** 2) / (2 * a * (i))
             radians = math.acos(inverseanglemath)
             degrees = math.degrees(radians)
-            angles.append(int (degrees*3.0)) #note that this is for 1/3 degree resolution and due to data transfer.
-        return angles #should be a list of 6 servo angles between 0 and 240 (a0,a1...,a5)
+            angles.append(int (degrees*4.0)) #note that this is for 1/4 degree resolution
+        return angles #should be a list of 6 servo angles between 0 and 320 (a0,a1...,a5)
 
 
 def main(): #runs when we start the script

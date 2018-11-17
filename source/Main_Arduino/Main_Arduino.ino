@@ -24,7 +24,7 @@ while (dataArray[5]==-1){
     if (Serial.available() > 0) {
                 // read the incoming byte:
                  data=int(Serial.readStringUntil('\n'));
-                 dataArray[servoIndex]=map(data,0,240,servoMap[servoIndex][0],servoMap[servoIndex][1]);
+                 dataArray[servoIndex]=map(data,0,320,servoMap[servoIndex][0],servoMap[servoIndex][1]);
                  servoIndex++;
                  Serial.println(data, DEC);}
                 }
