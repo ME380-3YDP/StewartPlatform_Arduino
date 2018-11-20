@@ -20,7 +20,7 @@ class SeqHandler:
 
 class Arduino:
     def __init__(self):
-        self.serial=serial.Serial('/dev/ttyACM0', 19200)
+        self.serial=serial.Serial('COM3', 9600)
     def read(self):
         data=int(self.serial.readline())
         return data

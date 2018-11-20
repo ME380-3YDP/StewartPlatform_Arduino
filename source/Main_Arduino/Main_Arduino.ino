@@ -8,7 +8,7 @@ int servoMap[2][6]={
 
 void setup() {
   // put your setup code here, to run once:
-Serial.begin(19200);
+Serial.begin(9600);
 pwm.begin();
 pwm.setPWMFreq(60);  // Analog servos run at ~60 Hz updates
 for (int i=0; i<6; i++){
