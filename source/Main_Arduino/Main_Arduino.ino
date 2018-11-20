@@ -2,13 +2,13 @@
 #include <Adafruit_PWMServoDriver.h>
 Adafruit_PWMServoDriver pwm = Adafruit_PWMServoDriver();
 int servoMap[2][6]={
-  {197,168,178,150,190,170},
-  {368,325,395,315,410,360,}
+  {160,168,178,150,190,165},
+  {315,325,395,315,400,320,}
 };
 
 void setup() {
   // put your setup code here, to run once:
-Serial.begin(9600);
+Serial.begin(19200);
 pwm.begin();
 pwm.setPWMFreq(60);  // Analog servos run at ~60 Hz updates
 for (int i=0; i<6; i++){
@@ -27,7 +27,7 @@ while (dataArray[5]==-1){
                  int angle=int(data*4.0);
                  dataArray[servoIndex]=map(angle,0,360,servoMap[0][servoIndex],servoMap[1][servoIndex]);
                  servoIndex++;
-                 Serial.println(data, DEC);}
+                 Serial.println(angle, DEC);}
                 }
   for (int i=0; i<6; i++){
   pwm.setPWM(i, 0, dataArray[i]); //(servo, 0, position)}

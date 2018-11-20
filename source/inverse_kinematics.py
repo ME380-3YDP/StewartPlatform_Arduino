@@ -22,7 +22,7 @@ class invKinematics:
         self.platformCoords = np.multiply(baseRadius, coordinates)
 
     def run(self):
-        controller = Arduino()
+        self.controller = Arduino()
         self.positions = self.csv.read()  # array of position vectors
         for idx, vector in enumerate(self.positions):
             # I assume a positionVector of the form [psi,theta,phi,x,y,z,time]
@@ -31,7 +31,7 @@ class invKinematics:
             self.angles = self.computeAngles(
                 lengths)  # lengths is a list of 6 lengths of the form (L0,L1,L2,L3,L4,L5) in mm defined as positive from the fully retracted position of the syringe.
             for i in self.angles:
-                controller.write(i)  # write each angle to the Arduino
+                self.controller.write(i)  # write each angle to the Arduino
             print("Moving to", vector)
             wait = vector[6]
             time.sleep(wait)
@@ -222,6 +222,9 @@ def main():  # runs when we start the script
                 vector = [psi, theta, phi, x, y, z, t]
 
                 invKinematicsMANUALMODE(vector)
+                lengths=kin.computeLengths(vector)
+                angles=kin.computeAngles(lengths)
+                kin.controller.write(angles)
 
             # TODO make manual command mode here that tilts in x and y
 
