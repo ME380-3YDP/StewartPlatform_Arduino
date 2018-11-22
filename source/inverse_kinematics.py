@@ -186,6 +186,21 @@ def main():  # runs when we start the script
                 sequence_file = 0
             kin = invKinematics(sequence_file)
             kin.run()
+        elif command=="X":
+            ard=Arduino()
+            solution=np.array([[80.0,80.0,80.0,80.0,80.0,80.0],
+                               [25.0,80.0,25.0,80.0,80.0,80.0],
+                               [30.0,80.0,25.0,25.0,80.0,80.0],
+                               [90.0,60.0,90.0,80.0,25.0,15.0],
+                               [30.0,80.0,25.0,25.0,80.0,80.0]])
+            for indx,i in enumerate(solution):
+                time.sleep(5)
+                for angle in i:
+                    print(angle)
+                    ard.write(angle)  # write each angle to the Arduino
+                if indx!=2:
+                    time.sleep(3);
+
         elif command == "M":
             psi=0
             theta=0
