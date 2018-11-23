@@ -14,6 +14,64 @@ from tkinter.filedialog import askopenfilename
 root = tkinter.Tk()  # File open dialog
 root.withdraw()
 
+psi = 3
+theta = 3
+phi = 3
+x = 0
+y = 0
+z = 0.23
+t = 1
+Yaxisincrement = 3
+Xaxisincrement = 3
+
+
+
+def key_bind(event):                   #key_bind defines key binding function
+    commandtwo = event.keysym.lower()
+    print(commandtwo)
+
+    # commandtwo = input("Command:") commented out, only needed if using enter instead of key binding
+
+    if commandtwo == "w":  # ONE degree clockwise (CW) about the Y-AXIS (from perspective of +ve y-axis facing to right and +ve x-axis facing toward you)
+        global Yaxisincrement
+        Yaxisincrement +=1
+
+
+
+    elif commandtwo == "s":
+        Yaxisincrement = Yaxisincrement - 1
+
+
+
+    elif commandtwo == "a":
+         global Xaxisincrement
+         Xaxisincrement = Xaxisincrement - 1
+
+
+
+    elif commandtwo == "d":
+        Xaxisincrement = Xaxisincrement + 1
+
+
+    vector = [psi, Yaxisincrement, Xaxisincrement, x, y, z, t]
+
+    c = invKinematicsMANUALMODE(vector)
+
+    # I assume a positionVector of the form [psi,theta,phi,x,y,z,time]
+    lengths = c.computeLengthsMANUALMODE(vector)
+    ts = time.time()
+    st = datetime.datetime.fromtimestamp(ts).strftime('%Y-%m-%d %H:%M:%S')
+    print(commandtwo)
+    print(st)
+    print("Syringe Lengths:", lengths)
+    angles = c.computeAnglesMANUALMODE(
+        lengths)  # lengths is a list of 6 lengths of the form (L0,L1,L2,L3,L4,L5) in mm defined as positive from the fully retracted position of the syringe.
+
+    for i in angles:
+        controller.write(i)  # write each angle to the Arduino
+    print("Moving to", vector)
+    wait = vector[6]
+    time.sleep(wait)
 
 class invKinematics:
     def __init__(self, sequencePath):
@@ -137,11 +195,11 @@ class invKinematicsMANUALMODE:
             lengths.append(legLength)
         return lengths
 
-    def computeAnglesMANUALMODE(self, lengths):
+    def computeAnglesMANUALMODE(self,lengths):
         range = mechParams['rangeOfMotion']
         if any(t < 0 or t > range for t in lengths):
             print("ERROR, lengths out of ROM", lengths)
-            exit()
+            #exit()
         lengths = [range - i for i in
                    lengths]  # convert the top syringe length to motion at the bottom by subtracting ROM
 
@@ -154,7 +212,8 @@ class invKinematicsMANUALMODE:
             radians = math.acos(inverseanglemath)
             degrees = math.degrees(radians)
             angles.append(degrees)
-        return angles  # should be a list of 6 servo angles between 0 and 320 (a0,a1...,a5)
+        return angles
+
 
 
 
@@ -163,76 +222,29 @@ class invKinematicsMANUALMODE:
 
 
 def main():  # runs when we start the script
-    while True:
-        command = input("R to run a solution, M for manual Mode")
-        if command == "R":
-            try:
-                sequence_file = askopenfilename(title="Select sequence file",
-                                                filetypes=(("Memes", "*.csv"), ("all files", "*.*")))
-            except:
-                sequence_file = 0
-            kin = invKinematics(sequence_file)
-            kin.run()
-        elif command == "M":
-            psi=3
-            theta=3
-            phi=3
-            x=0
-            y=0
-            z=0.23
-            t=1
-            Yaxisincrement=3
-            Xaxisincrement=3
-            controller = Arduino()
+    command = input("R to run a solution, M for manual Mode")
+    if command == "R":
+        try:
+            sequence_file = askopenfilename(title="Select sequence file",
+                                            filetypes=(("Memes", "*.csv"), ("all files", "*.*")))
+        except:
+            sequence_file = 0
+        kin = invKinematics(sequence_file)
+        kin.run()
+    elif command == "M":
+        global controller
+        controller = Arduino()
 
-            while True:
-                commandtwo = input("Command:")
-
-                if commandtwo == "W":  # ONE degree clockwise (CW) about the Y-AXIS (from perspective of +ve y-axis facing to right and +ve x-axis facing toward you)
-
-                    Yaxisincrement = Yaxisincrement + 1
-                    theta = Yaxisincrement
-
-
-                elif commandtwo == "S":
-
-                    Yaxisincrement = Yaxisincrement - 1
-                    theta = Yaxisincrement
-
-
-                elif commandtwo == "A":
-                    Xaxisincrement = Xaxisincrement - 1
-                    phi = Xaxisincrement
-
-
-                elif commandtwo == "D":
-                    Xaxisincrement = Xaxisincrement + 1
-                    phi = Xaxisincrement
-
-
-                if psi>10 or theta>10 or phi>10:
-                    print('ERROR: Out of Range of Motion')
-                    quit()
-
-                vector = [psi, theta, phi, x, y, z, t]
+        command = tkinter.Tk()                  #these three lines control keybinding
+        command.bind_all("<Key>", key_bind)
+        command.mainloop()
 
 
 
-                c=invKinematicsMANUALMODE(vector)
 
-                # I assume a positionVector of the form [psi,theta,phi,x,y,z,time]
-                lengths = c.computeLengthsMANUALMODE(vector)
-                ts = time.time()
-                st = datetime.datetime.fromtimestamp(ts).strftime('%Y-%m-%d %H:%M:%S')
-                print (st)
-                print("Syringe Lengths:", lengths)
-                angles = c.computeAnglesMANUALMODE(lengths)  #lengths is a list of 6 lengths of the form (L0,L1,L2,L3,L4,L5) in mm defined as positive from the fully retracted position of the syringe.
 
-                for i in angles:
-                    controller.write(i)  # write each angle to the Arduino
-                print("Moving to", vector)
-                wait = vector[6]
-                time.sleep(wait)
+            #while True: Audrey's old endless loop now obsolete
+
 
 
 
