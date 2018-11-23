@@ -4,6 +4,11 @@ import numpy as np
 import math
 import time
 import tkinter
+import datetime
+import msvcrt
+
+
+
 from tkinter.filedialog import askopenfilename
 
 root = tkinter.Tk()  # File open dialog
@@ -22,7 +27,7 @@ class invKinematics:
         self.platformCoords = np.multiply(baseRadius, coordinates)
 
     def run(self):
-        self.controller = Arduino()
+        controller = Arduino()
         self.positions = self.csv.read()  # array of position vectors
         for idx, vector in enumerate(self.positions):
             # I assume a positionVector of the form [psi,theta,phi,x,y,z,time]
@@ -31,7 +36,7 @@ class invKinematics:
             self.angles = self.computeAngles(
                 lengths)  # lengths is a list of 6 lengths of the form (L0,L1,L2,L3,L4,L5) in mm defined as positive from the fully retracted position of the syringe.
             for i in self.angles:
-                self.controller.write(i)  # write each angle to the Arduino
+                controller.write(i)  # write each angle to the Arduino
             print("Moving to", vector)
             wait = vector[6]
             time.sleep(wait)
@@ -88,7 +93,7 @@ class invKinematicsMANUALMODE:
     def __init__(self,vector):
 
 
-        self.runMANUALMODE(vector)
+        #self.runMANUALMODE(vector)
         c15, s15, sqrt2 = (np.cos(np.pi / 12.0), np.sin(np.pi / 12.0), np.sqrt(2) / 2.0)
         coordinates = np.array(
             [[-c15, -s15, 0], [-sqrt2, -sqrt2, 0], [sqrt2, -sqrt2, 0], [c15, -s15, 0], [s15, c15, 0], [-s15, c15, 0]])
@@ -97,24 +102,6 @@ class invKinematicsMANUALMODE:
         self.platformCoords = np.multiply(baseRadius, coordinates)
 
 
-    def runMANUALMODE(self,vector):
-
-
-        controller = Arduino()
-
-
-
-
-            # I assume a positionVector of the form [psi,theta,phi,x,y,z,time]
-        lengths = self.computeLengthsMANUALMODE(vector)
-        print("Syringe Lengths:", lengths)
-        self.angles = self.computeAnglesMANUALMODE(
-            lengths)  # lengths is a list of 6 lengths of the form (L0,L1,L2,L3,L4,L5) in mm defined as positive from the fully retracted position of the syringe.
-        for i in self.angles:
-            controller.write(i)  # write each angle to the Arduino
-        print("Moving to", vector)
-        wait = vector[6]
-        time.sleep(wait)
 
     def createTransformMatrixMANUALMODE(self, rotation):
         psi, theta, phi = rotation
@@ -186,33 +173,21 @@ def main():  # runs when we start the script
                 sequence_file = 0
             kin = invKinematics(sequence_file)
             kin.run()
-        elif command=="X":
-            ard=Arduino()
-            solution=np.array([[80.0,80.0,80.0,80.0,80.0,80.0],
-                               [25.0,80.0,25.0,80.0,80.0,80.0],
-                               [30.0,80.0,25.0,25.0,80.0,80.0],
-                               [90.0,60.0,90.0,80.0,25.0,15.0],
-                               [30.0,80.0,25.0,25.0,80.0,80.0]])
-            for indx,i in enumerate(solution):
-                time.sleep(5)
-                for angle in i:
-                    print(angle)
-                    ard.write(angle)  # write each angle to the Arduino
-                if indx!=2:
-                    time.sleep(3);
-
         elif command == "M":
-            psi=0
-            theta=0
-            phi=0
+            psi=3
+            theta=3
+            phi=3
             x=0
             y=0
             z=0.23
             t=1
-            Yaxisincrement=0
-            Xaxisincrement=0
+            Yaxisincrement=3
+            Xaxisincrement=3
+            controller = Arduino()
+
             while True:
                 commandtwo = input("Command:")
+
                 if commandtwo == "W":  # ONE degree clockwise (CW) about the Y-AXIS (from perspective of +ve y-axis facing to right and +ve x-axis facing toward you)
 
                     Yaxisincrement = Yaxisincrement + 1
@@ -234,14 +209,33 @@ def main():  # runs when we start the script
                     Xaxisincrement = Xaxisincrement + 1
                     phi = Xaxisincrement
 
+
+                if psi>10 or theta>10 or phi>10:
+                    print('ERROR: Out of Range of Motion')
+                    quit()
+
                 vector = [psi, theta, phi, x, y, z, t]
 
-                invKinematicsMANUALMODE(vector)
-                lengths=kin.computeLengths(vector)
-                angles=kin.computeAngles(lengths)
-                kin.controller.write(angles)
 
-            # TODO make manual command mode here that tilts in x and y
+
+                c=invKinematicsMANUALMODE(vector)
+
+                # I assume a positionVector of the form [psi,theta,phi,x,y,z,time]
+                lengths = c.computeLengthsMANUALMODE(vector)
+                ts = time.time()
+                st = datetime.datetime.fromtimestamp(ts).strftime('%Y-%m-%d %H:%M:%S')
+                print (st)
+                print("Syringe Lengths:", lengths)
+                angles = c.computeAnglesMANUALMODE(lengths)  #lengths is a list of 6 lengths of the form (L0,L1,L2,L3,L4,L5) in mm defined as positive from the fully retracted position of the syringe.
+
+                for i in angles:
+                    controller.write(i)  # write each angle to the Arduino
+                print("Moving to", vector)
+                wait = vector[6]
+                time.sleep(wait)
+
+
+
 
 
 if __name__ == '__main__':
