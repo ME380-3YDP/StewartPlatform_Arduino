@@ -7,8 +7,7 @@ import tkinter
 import datetime
 import msvcrt
 
-
-
+#key presses here
 from tkinter.filedialog import askopenfilename
 
 root = tkinter.Tk()  # File open dialog
