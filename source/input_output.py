@@ -26,7 +26,7 @@ class Arduino:
         return data
 
     def write(self,data):
-        dataStr=str(data)
+        dataStr=str(data*1.25)
         dataStr+=" \n"
         self.serial.write(dataStr.encode())
         #response=float(self.serial.readline())

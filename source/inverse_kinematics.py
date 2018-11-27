@@ -28,28 +28,29 @@ Xaxisincrement = 3
 def key_bind(event):                   #key_bind defines key binding function
     commandtwo = event.keysym.lower()
     print(commandtwo)
+    increment = 1;
 
     # commandtwo = input("Command:") commented out, only needed if using enter instead of key binding
 
     if commandtwo == "w":  # ONE degree clockwise (CW) about the Y-AXIS (from perspective of +ve y-axis facing to right and +ve x-axis facing toward you)
         global Yaxisincrement
-        Yaxisincrement +=1
+        Yaxisincrement += increment
 
 
 
     elif commandtwo == "s":
-        Yaxisincrement = Yaxisincrement - 1
+        Yaxisincrement = Yaxisincrement - increment
 
 
 
     elif commandtwo == "a":
          global Xaxisincrement
-         Xaxisincrement = Xaxisincrement - 1
+         Xaxisincrement = Xaxisincrement - increment
 
 
 
     elif commandtwo == "d":
-        Xaxisincrement = Xaxisincrement + 1
+        Xaxisincrement = Xaxisincrement + increment
 
 
     vector = [psi, Yaxisincrement, Xaxisincrement, x, y, z, t]
@@ -68,6 +69,7 @@ def key_bind(event):                   #key_bind defines key binding function
 
     for i in angles:
         controller.write(i)  # write each angle to the Arduino
+        #print("Passing to arduino", i)
     print("Moving to", vector)
     wait = vector[6]
     time.sleep(wait)
@@ -207,10 +209,24 @@ class invKinematicsMANUALMODE:
         b = mechParams['conRodLength']
         c_length = [a + b - i for i in lengths]  # starting length when syringe plunger fully enclosed (retracted pos'n)
         for i in c_length:
-            inverseanglemath = -(b ** 2 - a ** 2 - (i) ** 2) / (2 * a * (i))
-            radians = math.acos(inverseanglemath)
-            degrees = math.degrees(radians)
-            angles.append(degrees)
+            if i > a + b:
+                i = a + b
+                inverseanglemath = -(b ** 2 - a ** 2 - (i) ** 2) / (2 * a * (i))
+                radians = math.acos(inverseanglemath)
+                degrees = math.degrees(radians)
+                angles.append(degrees)
+                print("crank/con-rod length exceeded")
+
+            elif i == 0:
+                angles.append(90)
+                print("90 degree crank/con-rod angle reached or exceeded")
+
+            else:
+                inverseanglemath = -(b ** 2 - a ** 2 - (i) ** 2) / (2 * a * (i))
+                radians = math.acos(inverseanglemath)
+                degrees = math.degrees(radians)
+                angles.append(degrees)
+
         return angles
 
 

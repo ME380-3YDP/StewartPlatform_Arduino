@@ -2,8 +2,8 @@
 #include <Adafruit_PWMServoDriver.h>
 Adafruit_PWMServoDriver pwm = Adafruit_PWMServoDriver();
 int servoMap[2][6]={
-  {280,210,240,255,245,185},
-  {470,375,460,435,400,310,}
+  {300,210,240,255,245,205},
+  {530,400,465,435,400,395,}
 };
 int oldData[6]={325,225,250,255,245,230};
 float deltas[6]={0,0,0,0,0,0};
