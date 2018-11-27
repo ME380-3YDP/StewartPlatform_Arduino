@@ -2,12 +2,13 @@
 #include <Adafruit_PWMServoDriver.h>
 Adafruit_PWMServoDriver pwm = Adafruit_PWMServoDriver();
 int servoMap[2][6]={
-  {300,210,240,255,245,205},
-  {530,400,465,435,400,395,}
+
+  {250,210,230,255,245,185},
+  {440,370,425,435,400,325,}
 };
 int oldData[6]={325,225,250,255,245,230};
 float deltas[6]={0,0,0,0,0,0};
-float substeps=50;
+float substeps=100;
 void setup() {
   // put your setup code here, to run once:
 Serial.begin(19200);
@@ -38,7 +39,7 @@ int PWMstep=0;
     for (int i=0; i<6; i++){
       PWMstep=oldData[i]+j*deltas[i];
   pwm.setPWM(i, 0, int(PWMstep)); //(servo, 0, position)}
-  delay(1);
+  delay(5);
   }          
   }
 for(int i=0; i<6; i++){
