@@ -14,16 +14,13 @@ class Arduino:
         self.serial.write(dataStr.encode())
 
 controller = Arduino()
-time.sleep(3)
-sleepy = [4, 4, 4, 4,4,4]
+time.sleep(1)
+sleepy = [4, 4, 4, 4]
 solution = np.array([
-    [20, 80, 20, 80, 80, 80],
-    [80, 80, 30, 30, 80, 80],
-    [60, 80, 60, 80, 80, 80],
-    [60, 60, 80, 80, 80, 80],
-    [60, 35, 90, 90, 40, 20],
-    [90, 90, 30, 30, 70, 70],
-    [90, 60, 80, 80, 80, 40],
+    [10, 10, 80, 80, 80, 10],
+    [30, 80, 40, 80, 80, 90],
+    [30, 30, 80, 80, 90, 40],
+    [60, 60, 80, 60, 30, 10],
 ])
 for j, step in enumerate(solution):
     angles = step
